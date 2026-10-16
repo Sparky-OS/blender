@@ -336,11 +336,6 @@ GHOST_TSuccess GHOST_ContextEGL::initializeDrawingContext()
   std::vector<EGLint> attrib_list;
   EGLint num_config = 0;
 
-  if (context_params_.is_stereo_visual) {
-    fprintf(stderr, "Warning! Stereo OpenGL ES contexts are not supported.\n");
-  }
-  context_params_.is_stereo_visual = false; /* It doesn't matter what the Window wants. */
-
   EGLDisplay prev_display = eglGetCurrentDisplay();
   EGLSurface prev_draw = eglGetCurrentSurface(EGL_DRAW);
   EGLSurface prev_read = eglGetCurrentSurface(EGL_READ);
@@ -398,6 +393,18 @@ GHOST_TSuccess GHOST_ContextEGL::initializeDrawingContext()
   }
   if (!bindAPI(api_)) {
     goto error;
+  }
+
+  /* A window surface with two views has the left and right back buffers of desktop OpenGL,
+   * see `EGL_EXT_multiview_window`. */
+  if (context_params_.is_stereo_visual) {
+    if (api_ != EGL_OPENGL_API || native_window_ == 0 ||
+        !epoxy_has_egl_extension(display_, "EGL_EXT_multiview_window"))
+    {
+      fprintf(
+          stderr, "Warning! Stereo %s contexts are not supported.\n", api_string(api_).c_str());
+      context_params_.is_stereo_visual = false; /* Set context property to actual value. */
+    }
   }
 
   /* Build attribute list. */
@@ -475,7 +482,7 @@ GHOST_TSuccess GHOST_ContextEGL::initializeDrawingContext()
 
   if (native_window_ != 0) {
     std::vector<EGLint> surface_attrib_list;
-    surface_attrib_list.reserve(3);
+    surface_attrib_list.reserve(5);
 #ifdef WITH_GHOST_WAYLAND
     /* Fix transparency issue on: `Wayland + Nouveau/Zink+NVK`. Due to unsupported texture formats
      * drivers can hit transparency code-paths resulting in showing the desktop in viewports.
@@ -491,6 +498,10 @@ GHOST_TSuccess GHOST_ContextEGL::initializeDrawingContext()
       surface_attrib_list.push_back(EGL_TRUE);
     }
 #endif
+    if (context_params_.is_stereo_visual) {
+      surface_attrib_list.push_back(EGL_MULTIVIEW_VIEW_COUNT_EXT);
+      surface_attrib_list.push_back(2);
+    }
     surface_attrib_list.push_back(EGL_NONE);
 
     surface_ = ::eglCreateWindowSurface(
