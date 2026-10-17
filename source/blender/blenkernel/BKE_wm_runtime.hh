@@ -108,6 +108,9 @@ struct WindowRuntime {
   bool ime_data_is_composing = false;
 #endif
 
+  /** The right back buffer of a quad-buffer (page-flip) window has been drawn. */
+  bool stereo3d_right_drawn = false;
+
   WindowRuntime() = default;
   ~WindowRuntime();
 };

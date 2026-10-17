@@ -35,6 +35,7 @@
 #include "BKE_layer.hh"
 #include "BKE_scene.hh"
 #include "BKE_screen.hh"
+#include "BKE_wm_runtime.hh"
 
 #include "GHOST_C-api.h"
 
@@ -1227,6 +1228,13 @@ static void wm_draw_window(bContext *C, wmWindow *win)
   /* Now we draw into the window frame-buffer, in full window coordinates. */
   if (!stereo) {
     /* Regular mono drawing. */
+    if (win->runtime->stereo3d_right_drawn) {
+      /* Once drawn, the right back buffer is shown too: keep it the same as the left one. */
+      GPU_backbuffer_bind(GPU_BACKBUFFER_RIGHT);
+      wm_draw_window_onscreen(C, win, -1);
+
+      GPU_backbuffer_bind(GPU_BACKBUFFER_LEFT);
+    }
     wm_draw_window_onscreen(C, win, -1);
   }
   else if (win->stereo3d_format->display_mode == S3D_DISPLAY_PAGEFLIP) {
@@ -1236,6 +1244,8 @@ static void wm_draw_window(bContext *C, wmWindow *win)
 
     GPU_backbuffer_bind(GPU_BACKBUFFER_LEFT);
     wm_draw_window_onscreen(C, win, 0);
+
+    win->runtime->stereo3d_right_drawn = true;
   }
   else if (ELEM(win->stereo3d_format->display_mode, S3D_DISPLAY_ANAGLYPH, S3D_DISPLAY_INTERLACE)) {
     /* For anaglyph and interlace, we draw individual regions with
