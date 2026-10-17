@@ -194,6 +194,9 @@ struct WindowRuntime {
   /** Private runtime info to show text in the status bar. */
   void *cursor_keymap_status = nullptr;
 
+  /** The right back buffer of a quad-buffer (page-flip) window has been drawn. */
+  bool stereo3d_right_drawn = false;
+
   WindowRuntime() = default;
   ~WindowRuntime();
 };

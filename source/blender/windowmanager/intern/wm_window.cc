@@ -1053,6 +1053,7 @@ static void wm_window_ghostwindow_add(wmWindowManager *wm,
     wm_window_set_drawable(wm, win, false);
 
     win->runtime->ghostwin = ghost_window;
+    win->runtime->stereo3d_right_drawn = false;
     ghost_window->setUserData(win); /* Pointer back. */
 
     wm_window_ensure_eventstate(win);

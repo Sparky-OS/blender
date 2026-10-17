@@ -285,6 +285,7 @@ static void wm_file_read_setup_wm_substitute_old_window(wmWindowManager *oldwm,
 {
   win->runtime->ghostwin = oldwin->runtime->ghostwin;
   win->runtime->gpuctx = oldwin->runtime->gpuctx;
+  win->runtime->stereo3d_right_drawn = oldwin->runtime->stereo3d_right_drawn;
   win->active = oldwin->active;
   if (win->active) {
     wm->runtime->winactive = win;
