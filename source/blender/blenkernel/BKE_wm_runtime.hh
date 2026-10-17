@@ -110,6 +110,8 @@ struct WindowRuntime {
 
   /** The right back buffer of a quad-buffer (page-flip) window has been drawn. */
   bool stereo3d_right_drawn = false;
+  /** The window's GPU context has quad-buffer stereo (a mono window otherwise). */
+  bool stereo3d_quadbuffer = false;
 
   WindowRuntime() = default;
   ~WindowRuntime();

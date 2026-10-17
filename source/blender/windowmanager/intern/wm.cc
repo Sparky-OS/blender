@@ -190,10 +190,10 @@ static void window_manager_blend_read_data(BlendDataReader *reader, ID *id)
     win->event_queue_consecutive_gesture_data = nullptr;
     BLO_read_struct(reader, Stereo3dFormat, &win->stereo3d_format);
 
-    /* Multi-view always falls back to anaglyph at file opening
-     * otherwise quad-buffer saved files can break Blender. */
+    /* Windows are always quad-buffer (Time Sequential), whatever the file saved;
+     * where it is not supported the window gets a mono context. */
     if (win->stereo3d_format) {
-      win->stereo3d_format->display_mode = S3D_DISPLAY_ANAGLYPH;
+      win->stereo3d_format->display_mode = S3D_DISPLAY_PAGEFLIP;
     }
     win->runtime = MEM_new<blender::bke::WindowRuntime>(__func__);
   }

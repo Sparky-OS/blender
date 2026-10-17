@@ -2686,12 +2686,24 @@ static void rna_def_window_stereo3d(BlenderRNA *brna)
   StructRNA *srna;
   PropertyRNA *prop;
 
+  /* Windows hand both views to the desktop (quad-buffer), which makes every display format.
+   * Image and movie output formats keep #rna_enum_stereo3d_display_items. */
+  static const EnumPropertyItem window_stereo3d_display_items[] = {
+      {S3D_DISPLAY_PAGEFLIP,
+       "TIMESEQUENTIAL",
+       0,
+       "Time Sequential",
+       "Render alternate eyes (also known as page flip, quad buffer support in the graphic card "
+       "is required)"},
+      {0, nullptr, 0, nullptr, nullptr},
+  };
+
   srna = RNA_def_struct(brna, "Stereo3dDisplay", nullptr);
   RNA_def_struct_sdna(srna, "Stereo3dFormat");
   RNA_def_struct_ui_text(srna, "Stereo 3D Display", "Settings for stereo 3D display");
 
   prop = RNA_def_property(srna, "display_mode", PROP_ENUM, PROP_NONE);
-  RNA_def_property_enum_items(prop, rna_enum_stereo3d_display_items);
+  RNA_def_property_enum_items(prop, window_stereo3d_display_items);
   RNA_def_property_ui_text(prop, "Display Mode", "");
 
   prop = RNA_def_property(srna, "anaglyph_type", PROP_ENUM, PROP_NONE);
