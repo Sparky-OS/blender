@@ -353,6 +353,7 @@ wmWindow *wm_window_new(const Main *bmain, wmWindowManager *wm, wmWindow *parent
   /* Dialogs may have a child window as parent. Otherwise, a child must not be a parent too. */
   win->parent = (!dialog && parent && parent->parent) ? parent->parent : parent;
   win->stereo3d_format = MEM_new<Stereo3dFormat>("Stereo 3D Format (window)");
+  win->stereo3d_format->display_mode = S3D_DISPLAY_PAGEFLIP;
   win->workspace_hook = BKE_workspace_instance_hook_create(bmain, win->winid);
   win->runtime = MEM_new<bke::WindowRuntime>(__func__);
 
@@ -997,11 +998,12 @@ static void wm_window_ghostwindow_add(wmWindowManager *wm,
                                       wmWindow *win,
                                       bool is_dialog)
 {
-  /* A new window is created when page-flip mode is required for a window. */
+  /* Every window asks for quad-buffer stereo, so stereo 3D content is shown as soon as it is
+   * drawn; a window that does not draw the right eye stays mono. Where quad-buffer is not
+   * supported, GHOST creates a mono context. */
+  win->stereo3d_format->display_mode = S3D_DISPLAY_PAGEFLIP;
   GHOST_GPUSettings gpu_settings = {0};
-  if (win->stereo3d_format->display_mode == S3D_DISPLAY_PAGEFLIP) {
-    gpu_settings.flags |= GHOST_gpuStereoVisual;
-  }
+  gpu_settings.flags |= GHOST_gpuStereoVisual;
 
   if (G.debug & G_DEBUG_GPU) {
     gpu_settings.flags |= GHOST_gpuDebugContext;
@@ -1054,6 +1056,7 @@ static void wm_window_ghostwindow_add(wmWindowManager *wm,
 
     win->runtime->ghostwin = ghost_window;
     win->runtime->stereo3d_right_drawn = false;
+    win->runtime->stereo3d_quadbuffer = GPU_stereo_quadbuffer_support();
     ghost_window->setUserData(win); /* Pointer back. */
 
     wm_window_ensure_eventstate(win);

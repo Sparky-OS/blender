@@ -4189,10 +4189,20 @@ static void WM_OT_stereo3d_set(wmOperatorType *ot)
   ot->check = wm_stereo3d_set_check;
   ot->cancel = wm_stereo3d_set_cancel;
 
+  /* Windows hand both views to the desktop (quad-buffer), which makes every display format. */
+  static const EnumPropertyItem window_stereo3d_display_items[] = {
+      {S3D_DISPLAY_PAGEFLIP,
+       "TIMESEQUENTIAL",
+       0,
+       "Time Sequential",
+       "Render alternate eyes (also known as page flip, quad buffer support in the graphic card "
+       "is required)"},
+      {0, nullptr, 0, nullptr, nullptr},
+  };
   prop = RNA_def_enum(ot->srna,
                       "display_mode",
-                      rna_enum_stereo3d_display_items,
-                      S3D_DISPLAY_ANAGLYPH,
+                      window_stereo3d_display_items,
+                      S3D_DISPLAY_PAGEFLIP,
                       "Display Mode",
                       "");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE);

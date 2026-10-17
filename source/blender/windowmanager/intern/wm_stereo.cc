@@ -19,6 +19,7 @@
 #include "BKE_context.hh"
 #include "BKE_global.hh"
 #include "BKE_report.hh"
+#include "BKE_wm_runtime.hh"
 
 #include "BLT_translation.hh"
 
@@ -143,6 +144,13 @@ bool WM_stereo3d_enabled(wmWindow *win, bool skip_stereo3d_check)
   const bScreen *screen = WM_window_get_active_screen(win);
   const Scene *scene = WM_window_get_active_scene(win);
   const GHOST_IWindow *ghost_window = static_cast<GHOST_IWindow *>(win->runtime->ghostwin);
+
+  /* A window created mono, where quad-buffer stereo is not supported. */
+  if (win->stereo3d_format->display_mode == S3D_DISPLAY_PAGEFLIP &&
+      !win->runtime->stereo3d_quadbuffer)
+  {
+    return false;
+  }
 
   /* Some 3d methods change the window arrangement, thus they shouldn't
    * toggle on/off just because there is no 3d elements being drawn. */
