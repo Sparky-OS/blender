@@ -247,6 +247,16 @@ GHOST_TSuccess GHOST_ContextGLX::initializeDrawingContext()
 
         framebuffer_config = glXChooseFBConfig(
             display_, DefaultScreen(display_), glx_attribs, &fbcount);
+
+        if (framebuffer_config == nullptr && context_params_.is_stereo_visual) {
+          fprintf(stderr, "Warning! Unable to find a stereo framebuffer configuration.\n");
+
+          GHOST_X11_GL_GetAttributes(glx_attribs, 64, false, false, true);
+          framebuffer_config = glXChooseFBConfig(
+              display_, DefaultScreen(display_), glx_attribs, &fbcount);
+
+          context_params_.is_stereo_visual = false; /* Set context property to actual value. */
+        }
       }
 
       if (framebuffer_config) {
